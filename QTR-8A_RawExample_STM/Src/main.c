@@ -60,7 +60,7 @@ static void MX_ADC2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint16_t sensorValues[6];
 /* USER CODE END 0 */
 
 /**
@@ -104,6 +104,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	HAL_GPIO_WritePin(GPIOB, QTR_LEDON_Pin, SET);
+
+	// configurando o canla do adc
+	sConfig.Channel = ADC_CHANNEL_1;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc1);
+	if(HAL_ADC_PollForConversion(&hadc1, 5)==HAL_OK)
+		sensorValues[0] = HAL_ADC_GetValue(&hadc1);
   }
   /* USER CODE END 3 */
 }
