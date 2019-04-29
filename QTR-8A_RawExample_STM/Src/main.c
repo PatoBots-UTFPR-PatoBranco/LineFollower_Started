@@ -61,6 +61,8 @@ static void MX_ADC2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint16_t sensorValues[6];
+
+ADC_ChannelConfTypeDef sConfig = {0};
 /* USER CODE END 0 */
 
 /**
@@ -104,19 +106,72 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	// ativar o LEDON
 	HAL_GPIO_WritePin(GPIOB, QTR_LEDON_Pin, SET);
 
-	// configurando o canla do adc
+	// configurando o canal do adc
 	sConfig.Channel = ADC_CHANNEL_1;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-	{
 		Error_Handler();
-	}
 
 	// iniciando o adc e recebendo o valor da conversão
 	HAL_ADC_Start(&hadc1);
 	if(HAL_ADC_PollForConversion(&hadc1, 5)==HAL_OK)
 		sensorValues[0] = HAL_ADC_GetValue(&hadc1);
+
+	// configurando o canal do adc
+	sConfig.Channel = ADC_CHANNEL_2;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+			Error_Handler();
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc1);
+	if(HAL_ADC_PollForConversion(&hadc1, 5)==HAL_OK)
+		sensorValues[1] = HAL_ADC_GetValue(&hadc1);
+
+	// configurando o canal do adc
+	sConfig.Channel = ADC_CHANNEL_4;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+		Error_Handler();
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc1);
+	if(HAL_ADC_PollForConversion(&hadc1, 5)==HAL_OK)
+		sensorValues[2] = HAL_ADC_GetValue(&hadc1);
+
+	// configurando o canal do adc
+	sConfig.Channel = ADC_CHANNEL_1;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+		Error_Handler();
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc2);
+	if(HAL_ADC_PollForConversion(&hadc2, 5)==HAL_OK)
+		sensorValues[3] = HAL_ADC_GetValue(&hadc2);
+
+	// configurando o canal do adc
+	sConfig.Channel = ADC_CHANNEL_2;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+		Error_Handler();
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc2);
+	if(HAL_ADC_PollForConversion(&hadc2, 5)==HAL_OK)
+		sensorValues[4] = HAL_ADC_GetValue(&hadc2);
+
+	// configurando o canal do adc
+	sConfig.Channel = ADC_CHANNEL_3;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+		Error_Handler();
+
+	// iniciando o adc e recebendo o valor da conversão
+	HAL_ADC_Start(&hadc2);
+	if(HAL_ADC_PollForConversion(&hadc2, 5)==HAL_OK)
+		sensorValues[5] = HAL_ADC_GetValue(&hadc2);
+
+	// desativar o LEDON
+	HAL_GPIO_WritePin(GPIOB, QTR_LEDON_Pin, RESET);
+
   }
   /* USER CODE END 3 */
 }
@@ -239,7 +294,6 @@ static void MX_ADC2_Init(void)
 
   /* USER CODE END ADC2_Init 0 */
 
-  ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC2_Init 1 */
 
