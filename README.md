@@ -13,3 +13,7 @@ O projeto tem como objetivo dar um parâmetro de quão alinhado à linha da pist
 Será utilizado apenas 6 sensores da barra de sensores, e foram conectados do Sensor-1 ao Sensor-6 às portas A0 a A5 (estes devem ser configurados como ADC*x*_IN*y* conforme a especificação do micro) e o pino *LEDON* é conectado à porta D11 como GPIO_OUTPUT.
 
 <img src='documentation/images/esquema_QTR-8A.png' width=250>
+
+## QTR-8A Raw Example on Arduino
+
+texto thallia
