@@ -66,7 +66,48 @@ static void MX_ADC2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t _numSensors=6;
 uint32_t sensorValues[6];
+
+int _lastValue=0;
+uint32_t _maxValue=4000;
+const uint32_t _lineValue = 200;
+const uint32_t _noiseThreshold = 50;
+
+int readLine(uint32_t *sensor_values, uint8_t white_line)
+{
+	uint8_t i, on_line=0;
+	unsigned long avg=0;
+	unsigned int sum=0;
+
+	for(i=0; i<_numSensors; i++)
+	{
+		uint32_t value = sensor_values[i];
+		if(white_line)
+			value = _maxValue-value;
+
+		if(value>_lineValue)
+			on_line=1;
+
+		if(value>_noiseThreshold)
+		{
+			avg += (unsigned long)( value )*( (i+1)*1000 );
+			sum += value;
+		}
+	}
+
+	if(!on_line)
+	{
+		if(_lastValue<(_numSensors)*1000/2)
+			return 0;
+		else
+			return (_numSensors)*1000;
+	}
+
+	_lastValue = avg/sum;
+
+	return _lastValue;
+}
 /* USER CODE END 0 */
 
 /**
@@ -113,15 +154,19 @@ int main(void)
 
   // Ativar o ADC2 com DMA
   HAL_ADC_Start_DMA(&hadc2, &sensorValues[3], 3);
+
+  int pos=0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+	  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+	  /* USER CODE BEGIN 3 */
+	  HAL_Delay(100);
+	  pos = readLine(sensorValues, 1);
   }
 
   /* USER CODE END 3 */
@@ -409,7 +454,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-// Interrupção de final de conversão
+// Interrupï¿½ï¿½o de final de conversï¿½o
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   /* Prevent unused argument(s) compilation warning */
