@@ -42,6 +42,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 
@@ -50,12 +51,15 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t lock_encoder = 0;
+
 int cont_foward = 0;
 int cont_backrd = 0;
 /* USER CODE END 0 */
@@ -88,6 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -138,6 +143,51 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 8;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 10;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -177,7 +227,7 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	// se a interrupção ocorreu pela borda de subida do canal-A
-	if(GPIO_Pin == ENC_CH_A_Pin)
+	if(GPIO_Pin==ENC_CH_A_Pin && !lock_encoder)
 	{
 		// se o canal-B estiver em nível alto
 		if(HAL_GPIO_ReadPin(GPIOB, ENC_CH_B_Pin))
@@ -188,9 +238,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			cont_backrd += 1;
 		}
+
+		lock_encoder=1;
+		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
+		HAL_TIM_Base_Start(&htim2);
 	}
 	// se a interrupção ocorreu pela borda de subida do canal-B
-	else if(GPIO_Pin == ENC_CH_B_Pin)
+	else if(GPIO_Pin==ENC_CH_B_Pin && !lock_encoder)
 	{
 		// se o canal-B estiver em nível baixo
 		if(!HAL_GPIO_ReadPin(GPIOB, ENC_CH_A_Pin))
@@ -201,6 +255,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			cont_backrd += 1;
 		}
+
+		lock_encoder=1;
+		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
+		HAL_TIM_Base_Start_IT(&htim2);
+	}
+	else
+		__NOP();
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	// saber qual timer acionou a interrupção
+	if(htim->Instance == TIM2)
+	{
+		lock_encoder=0;
+		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 	else
 		__NOP();
