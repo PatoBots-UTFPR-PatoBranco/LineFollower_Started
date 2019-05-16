@@ -175,6 +175,10 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_OnePulse_Init(&htim2, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
@@ -227,41 +231,31 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	// se a interrupção ocorreu pela borda de subida do canal-A
+	// ock_encoder é para travar a execução da RTI e esperar pelo debouoncer
 	if(GPIO_Pin==ENC_CH_A_Pin && !lock_encoder)
 	{
 		// se o canal-B estiver em nível alto
-		if(HAL_GPIO_ReadPin(GPIOB, ENC_CH_B_Pin))
-		{
+		if(HAL_GPIO_ReadPin(GPIOA, ENC_CH_B_Pin)==GPIO_PIN_SET)
 			cont_foward += 1;
-		}
 		else
-		{
 			cont_backrd += 1;
-		}
 
-		lock_encoder=1;
-		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
-		HAL_TIM_Base_Start(&htim2);
+		lock_encoder=1;// travar a RTI
+		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);// zerar o timer 2
+		HAL_TIM_Base_Start_IT(&htim2);// inciar o timer 2 para debounceer
 	}
-	// se a interrupção ocorreu pela borda de subida do canal-B
-	else if(GPIO_Pin==ENC_CH_B_Pin && !lock_encoder)
+	if(GPIO_Pin==ENC_CH_B_Pin && !lock_encoder)
 	{
-		// se o canal-B estiver em nível baixo
-		if(!HAL_GPIO_ReadPin(GPIOB, ENC_CH_A_Pin))
-		{
+		// se o canal-A estiver em nível baixo
+		if(HAL_GPIO_ReadPin(GPIOB, ENC_CH_A_Pin)==GPIO_PIN_RESET)
 			cont_foward += 1;
-		}
 		else
-		{
 			cont_backrd += 1;
-		}
 
-		lock_encoder=1;
-		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
-		HAL_TIM_Base_Start_IT(&htim2);
+		lock_encoder=1;// travar a RTI
+		__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);// zerar o timer 2
+		HAL_TIM_Base_Start_IT(&htim2);// inciar o timer 2 para debounceer
 	}
-	else
-		__NOP();
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -269,8 +263,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	// saber qual timer acionou a interrupção
 	if(htim->Instance == TIM2)
 	{
-		lock_encoder=0;
-		HAL_TIM_Base_Stop_IT(&htim2);
+		HAL_TIM_Base_Stop_IT(&htim2);// parar o timer 2
+		lock_encoder=0;// habilitar o encoder novamente
+
+		// habilitar a requisição de interrupção
+		HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+		HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 	}
 	else
 		__NOP();
