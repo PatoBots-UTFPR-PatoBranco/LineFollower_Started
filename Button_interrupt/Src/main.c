@@ -58,7 +58,7 @@ static void MX_TIM17_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-bool lock_button = 0;
+uint8_t lock_button = 0;
 /* USER CODE END 0 */
 
 /**
