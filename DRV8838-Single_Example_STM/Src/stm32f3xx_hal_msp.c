@@ -110,9 +110,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
   /* USER CODE END TIM16_MspPostInit 0 */
   
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
     /**TIM16 GPIO Configuration    
-    PB6     ------> TIM16_CH1N 
+    PA6     ------> TIM16_CH1 
     */
     GPIO_InitStruct.Pin = PWM_ENABLE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;

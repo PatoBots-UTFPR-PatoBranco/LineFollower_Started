@@ -91,7 +91,12 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+  // iniciar o PWM
+  HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
+  // declarar as variáveis de uso
+  short signed int duty, phase;
+  phase=1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -101,6 +106,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	  HAL_GPIO_WritePin(GPIOB, PHASE_Pin, (GPIO_PinState)phase);
+	  for(duty=0; duty<(uint16_t)htim16.Init.Period; duty+=10)
+	  {
+		  htim16.Instance->CCR1 = (uint32_t)duty;
+		  HAL_Delay(1000);
+	  }
+	  HAL_Delay(1000);
+	  for(; duty>=0; duty-=10)
+	  {
+		  htim16.Instance->CCR1 = (uint32_t)duty;
+		  HAL_Delay(1000);
+	  }
+	  HAL_Delay(1000);
+
+	  if(phase==1)
+		  phase=0;
+	  else
+		  phase=1;
   }
   /* USER CODE END 3 */
 }
@@ -173,7 +197,7 @@ static void MX_TIM16_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 50;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -212,6 +236,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */

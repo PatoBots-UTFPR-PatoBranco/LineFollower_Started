@@ -61,7 +61,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define PWM_ENABLE_Pin GPIO_PIN_6
-#define PWM_ENABLE_GPIO_Port GPIOB
+#define PWM_ENABLE_GPIO_Port GPIOA
 #define PHASE_Pin GPIO_PIN_7
 #define PHASE_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
