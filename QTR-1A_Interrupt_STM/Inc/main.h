@@ -58,9 +58,9 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define QTR_side_Pin GPIO_PIN_7
-#define QTR_side_GPIO_Port GPIOA
-#define QTR_side_EXTI_IRQn EXTI9_5_IRQn
+#define QTR_left_side_Pin GPIO_PIN_7
+#define QTR_left_side_GPIO_Port GPIOA
+#define QTR_left_side_EXTI_IRQn EXTI9_5_IRQn
 #define LED_Pin GPIO_PIN_3
 #define LED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

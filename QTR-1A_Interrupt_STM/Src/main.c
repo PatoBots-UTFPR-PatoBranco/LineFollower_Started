@@ -56,7 +56,7 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t side_state = 0;
 /* USER CODE END 0 */
 
 /**
@@ -98,6 +98,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  HAL_GPIO_WritePin(GPIOB, LED_Pin, (GPIO_PinState)side_state);
   }
   /* USER CODE END 3 */
 }
@@ -152,11 +153,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : QTR_side_Pin */
-  GPIO_InitStruct.Pin = QTR_side_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  /*Configure GPIO pin : QTR_left_side_Pin */
+  GPIO_InitStruct.Pin = QTR_left_side_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(QTR_side_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(QTR_left_side_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -172,7 +173,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+// interrupção GPIO
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin==QTR_left_side_Pin)
+	{
+		if(side_state==0)
+			side_state=1;
+		else
+			side_state=0;
+	}
+}
 /* USER CODE END 4 */
 
 /**
